@@ -11,6 +11,8 @@
 #include <QUrlQuery>
 #include <QDebug>
 
+#include "websocketclient.h"
+
 LoginDialog::LoginDialog()
 {
     QSize size(400,300);
@@ -93,7 +95,7 @@ LoginDialog::LoginDialog()
 
         if(reply->error()){
             qDebug(reply->errorString().toLatin1());
-            _information_label->setText("网络异常，请稍后再试");
+            _information_label->setText("网络连接异常，请稍后再试");
             return;
         }
 
@@ -106,7 +108,8 @@ LoginDialog::LoginDialog()
             QString success("success:");
             if(!answer_ref.compare(success))
             {
-                _branch_name = new QString(answer.mid(8));
+                UserAccount::get_instance().set_branch_name(answer.mid(8));
+                WebSocketClient::get_instance().connect_server();
                 emit accept();
             }else{
                 _information_label->setText("登录失败，用户名或密码错误");

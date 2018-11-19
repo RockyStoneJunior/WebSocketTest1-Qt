@@ -17,13 +17,13 @@
 #include <QHttpMultiPart>
 
 #include "registerlabel.h"
+#include "useraccount.h"
 
 class LoginDialog : public QDialog
 {
     Q_OBJECT
 public:
     LoginDialog();
-    QString *getBranch(){return _branch_name;}
 
 private slots:
     void loginButtonClicked();
@@ -55,8 +55,6 @@ private:
     QNetworkRequest _network_request;
 
     QHttpMultiPart *_multi_part;
-
-    QString *_branch_name;
 };
 
 extern const char *yukang_branch[20][2];

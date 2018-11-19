@@ -6,6 +6,8 @@
 
 #include <QMainWindow>
 #include "websocketclient.h"
+#include "useraccount.h"
+#include "logindialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,17 +20,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QString *branch, QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-    QString &get_branch_name(){ return *_branch_name;}
 
 private:
     Ui::MainWindow *ui;
 
-    QString *_branch_name;
-
-    WebSocketClient *_web_socket_client;
+    LoginDialog _login_dlg;
 };
 
 #endif // MAINWINDOW_H

@@ -1,6 +1,8 @@
 ﻿#ifndef WEBSOCKETCLIENT_H
 #define WEBSOCKETCLIENT_H
 
+#pragma execution_character_set("utf-8")
+
 #include <QObject>
 #include <QtWebSockets/QWebSocket>
 #include <QAbstractSocket>
@@ -13,8 +15,31 @@ class MainWindow;
 class WebSocketClient : public QObject
 {
     Q_OBJECT
+
 public:
-    explicit WebSocketClient(const QUrl &url, MainWindow *main_window, QObject *parent = nullptr);
+    static WebSocketClient& get_instance(){
+        if(_instance == nullptr)
+        {
+            _instance = create_instance();
+        }
+
+        return *_instance;
+    }
+
+    void connect_server();
+
+protected:
+    explicit WebSocketClient(QObject *parent = nullptr);
+    virtual ~WebSocketClient(){
+        if(_instance != nullptr)
+        {
+            delete _instance;
+            _instance = nullptr;
+        }
+    }
+
+signals:
+    void set_mainwindow_title(QString title);
 
 private Q_SLOTS:
     void onConnected();
@@ -23,11 +48,10 @@ private Q_SLOTS:
 
 private:
     QWebSocket _web_socket;
-    QUrl _url;
-
     QTimer *_timer;
 
-    MainWindow *_main_window;
+    static WebSocketClient* _instance;
+    static WebSocketClient* create_instance(){return new WebSocketClient;}
 };
 
 #endif // WEBSOCKETCLIENT_H
