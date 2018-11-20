@@ -92,36 +92,7 @@ LoginDialog::LoginDialog()
 
     _is_login = true;
 
-    _network_manager = new QNetworkAccessManager;
-    connect(_network_manager, &QNetworkAccessManager::finished,
-            this, [=](QNetworkReply *reply){
-
-        _information_label->setStyleSheet("QLabel {color:red}");
-
-        if(reply->error()){
-            qDebug(reply->errorString().toLatin1());
-            _information_label->setText("网络连接异常，请稍后再试");
-            return;
-        }
-
-        QString answer = reply->readAll();
-        qDebug(answer.toUtf8());
-
-        if(_is_login)
-        {
-            QStringRef answer_ref(&answer, 0, 8);
-            QString success("success:");
-            if(!answer_ref.compare(success))
-            {
-                UserAccount::get_instance().set_branch_name(answer.mid(8));
-                emit accept();
-            }else{
-                _information_label->setText("登录失败，用户名或密码错误");
-            }
-        }else{
-            _information_label->setText(answer);
-        }
-    });
+    _http_post = new HttpPost;
 }
 
 void LoginDialog::loginButtonClicked()
@@ -155,22 +126,7 @@ void LoginDialog::loginButtonClicked()
 
          _information_label->setText("");
 
-//         _network_request.setUrl(QUrl("http://localhost:19966/user/login"));
-//         _network_request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-
-//         QUrlQuery qu;
-//         qu.addQueryItem("", "");
-//         qu.addQueryItem("username", _username_edit->text());
-//         qu.addQueryItem("password", _password_edit->text());
-
-//         QUrl params;
-//         params.setQuery(qu);
-//         _network_manager->post(_network_request, params.toEncoded());
-
-//         _information_label->setStyleSheet("QLabel {color:green}");
-
-
-         WebSocketClient::get_instance().connect_server();
+        _http_post->send_login_post();
          _information_label->setText("登陆进行中...");
     }else{
         qDebug("is register");
@@ -182,19 +138,7 @@ void LoginDialog::loginButtonClicked()
         }else{
              _information_label->setText("");
 
-             _network_request.setUrl(QUrl("http://localhost:19966/user/register"));
-             _network_request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-
-             QUrlQuery qu;
-             qu.addQueryItem("", "");
-             qu.addQueryItem("merchant_name", tr("愉康大药房"));
-             qu.addQueryItem("username", _username_edit->text());
-             qu.addQueryItem("password", _password_edit->text());
-             qu.addQueryItem("branch", _branch_list->currentText());
-
-             QUrl params;
-             params.setQuery(qu);
-             _network_manager->post(_network_request, params.toEncoded());
+            _http_post->send_register_post();
 
              _information_label->setStyleSheet("QLabel {color:green}");
              _information_label->setText("注册进行中...");

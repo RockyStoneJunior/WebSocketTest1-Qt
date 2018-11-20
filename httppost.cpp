@@ -2,6 +2,14 @@
 
 #include "useraccount.h"
 
+#include <QtNetwork/QNetworkReply>
+#include <QUrlQuery>
+#include <QNetworkRequest>
+
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonDocument>
+
 HttpPost::HttpPost(QObject *parent) : QObject(parent)
 {
     _network_manager = new QNetworkAccessManager;
@@ -16,22 +24,46 @@ HttpPost::HttpPost(QObject *parent) : QObject(parent)
             return;
         }
 
-        QString answer = reply->readAll();
-        qDebug(answer.toUtf8());
+        QString reponse = reply->readAll();
+        qDebug(reponse.toUtf8());
 
-        if(_is_login)
-        {
-            QStringRef answer_ref(&answer, 0, 8);
-            QString success("success:");
-            if(!answer_ref.compare(success))
-            {
-                UserAccount::get_instance().set_branch_name(answer.mid(8));
-                emit accept();
-            }else{
-                //_information_label->setText("登录失败，用户名或密码错误");
-            }
-        }else{
-            //_information_label->setText(answer);
+        QJsonDocument doc = QJsonDocument::fromJson(reponse.toUtf8());
+        QJsonObject obj = doc.object();
+
+        qDebug("result from json:" + obj["result"].toString().toUtf8());
+        qDebug("branch from json:" + obj["branch"].toString().toUtf8());
+        qDebug("token from json:" + obj["token"].toString().toUtf8());
+
+
+        QList<QByteArray> headerList = reply->rawHeaderList();
+        foreach(QByteArray head, headerList) {
+            qDebug() << head << ":" << reply->rawHeader(head);
+        }
+
+        _post_type = LOGIN;
+
+        switch (_post_type) {
+            case LOGIN:
+                {
+                    if(!obj["result"].toString().compare("success"))
+                    {
+                        UserAccount::get_instance().set_branch_name(obj["branch"].toString().toUtf8());
+                        UserAccount::get_instance().set_session_id(obj["token"].toString());
+                        qDebug("Login Success!!!");
+                        //emit accept();
+                    }else{
+                        //_information_label->setText("登录失败，用户名或密码错误");
+                    }
+                }
+                break;
+            case REGISTER:
+                //_information_label->setText(reponse);
+                break;
+            case RECONNECT:
+
+                break;
+            default:
+                break;
         }
     });
 }
@@ -43,8 +75,8 @@ void HttpPost::send_login_post()
 
     QUrlQuery qu;
     qu.addQueryItem("", "");
-    qu.addQueryItem("username", UserAccount::get_instance().get_username();
-    qu.addQueryItem("password", UserAccount::get_instance().get_password();
+    qu.addQueryItem("username", UserAccount::get_instance().get_username());
+    qu.addQueryItem("password", UserAccount::get_instance().get_password());
 
     QUrl params;
     params.setQuery(qu);
@@ -59,9 +91,9 @@ void HttpPost::send_register_post()
     QUrlQuery qu;
     qu.addQueryItem("", "");
     qu.addQueryItem("merchant_name", tr("愉康大药房"));
-    qu.addQueryItem("username", UserAccount::get_instance().get_username();
-    qu.addQueryItem("password", UserAccount::get_instance().get_password();
-    qu.addQueryItem("branch", UserAccount::get_instance().get_branch_name();
+    qu.addQueryItem("username", UserAccount::get_instance().get_username());
+    qu.addQueryItem("password", UserAccount::get_instance().get_password());
+    qu.addQueryItem("branch", UserAccount::get_instance().get_branch_name());
 
     QUrl params;
     params.setQuery(qu);

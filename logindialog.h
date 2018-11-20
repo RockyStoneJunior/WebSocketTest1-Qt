@@ -14,9 +14,12 @@
 #include <QComboBox>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
+#include <QUrlQuery>
 
 #include "registerlabel.h"
 #include "useraccount.h"
+#include "httppost.h"
 
 class LoginDialog : public QDialog
 {
@@ -50,8 +53,7 @@ private:
 
     bool _is_login;
 
-    QNetworkAccessManager *_network_manager;
-    QNetworkRequest _network_request;
+    HttpPost *_http_post;
 };
 
 extern const char *yukang_branch[20][2];
