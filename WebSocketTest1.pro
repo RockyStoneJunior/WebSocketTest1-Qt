@@ -30,14 +30,16 @@ SOURCES += \
     registerlabel.cpp \
     branch.cpp \
     websocketclient.cpp \
-    useraccount.cpp
+    useraccount.cpp \
+    httppost.cpp
 
 HEADERS += \
         mainwindow.h \
     logindialog.h \
     registerlabel.h \
     websocketclient.h \
-    useraccount.h
+    useraccount.h \
+    httppost.h
 
 FORMS += \
         mainwindow.ui

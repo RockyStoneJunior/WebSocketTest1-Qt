@@ -52,6 +52,8 @@ private:
 
     static WebSocketClient* _instance;
     static WebSocketClient* create_instance(){return new WebSocketClient;}
+
+    bool _is_login;
 };
 
 #endif // WEBSOCKETCLIENT_H

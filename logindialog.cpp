@@ -11,6 +11,11 @@
 #include <QUrlQuery>
 #include <QDebug>
 
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonDocument>
+
 #include "websocketclient.h"
 
 LoginDialog::LoginDialog()
@@ -109,7 +114,6 @@ LoginDialog::LoginDialog()
             if(!answer_ref.compare(success))
             {
                 UserAccount::get_instance().set_branch_name(answer.mid(8));
-                WebSocketClient::get_instance().connect_server();
                 emit accept();
             }else{
                 _information_label->setText("登录失败，用户名或密码错误");
@@ -118,8 +122,6 @@ LoginDialog::LoginDialog()
             _information_label->setText(answer);
         }
     });
-
-    _multi_part = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 }
 
 void LoginDialog::loginButtonClicked()
@@ -148,21 +150,27 @@ void LoginDialog::loginButtonClicked()
     {
         qDebug("is login");
 
+        UserAccount::get_instance().set_username(_username_edit->text());
+        UserAccount::get_instance().set_password(_password_edit->text());
+
          _information_label->setText("");
 
-         _network_request.setUrl(QUrl("http://localhost:19966/user/login"));
-         _network_request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+//         _network_request.setUrl(QUrl("http://localhost:19966/user/login"));
+//         _network_request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
-         QUrlQuery qu;
-         qu.addQueryItem("", "");
-         qu.addQueryItem("username", _username_edit->text());
-         qu.addQueryItem("password", _password_edit->text());
+//         QUrlQuery qu;
+//         qu.addQueryItem("", "");
+//         qu.addQueryItem("username", _username_edit->text());
+//         qu.addQueryItem("password", _password_edit->text());
 
-         QUrl params;
-         params.setQuery(qu);
-         _network_manager->post(_network_request, params.toEncoded());
+//         QUrl params;
+//         params.setQuery(qu);
+//         _network_manager->post(_network_request, params.toEncoded());
 
-         _information_label->setStyleSheet("QLabel {color:green}");
+//         _information_label->setStyleSheet("QLabel {color:green}");
+
+
+         WebSocketClient::get_instance().connect_server();
          _information_label->setText("登陆进行中...");
     }else{
         qDebug("is register");

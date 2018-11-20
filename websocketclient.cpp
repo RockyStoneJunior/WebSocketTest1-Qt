@@ -1,5 +1,10 @@
 ﻿#include "websocketclient.h"
 
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonDocument>
+
 WebSocketClient* WebSocketClient::_instance = nullptr;
 
 WebSocketClient::WebSocketClient(QObject *parent):
@@ -41,7 +46,18 @@ void WebSocketClient::onConnected()
     _timer->stop();
 
     connect(&_web_socket, &QWebSocket::textMessageReceived, this, &WebSocketClient::onTextMessageReceived);
-    _web_socket.sendTextMessage(UserAccount::get_instance().get_session_id());
+
+//    QJsonObject json;
+//    json["type"] = QJsonValue("login");
+//    QJsonObject form;
+//    form["username"] = QJsonValue(UserAccount::get_instance().get_username());
+//    form["password"] = QJsonValue(UserAccount::get_instance().get_password());
+//    json["form"] = QJsonValue(form);
+
+//    QJsonDocument doc(json);
+//    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+//    _web_socket.sendTextMessage(strJson);
 
     emit set_mainwindow_title("愉康大药房" + UserAccount::get_instance().get_branch_name() + "      已连接");
 }

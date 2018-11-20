@@ -14,7 +14,6 @@
 #include <QComboBox>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
-#include <QHttpMultiPart>
 
 #include "registerlabel.h"
 #include "useraccount.h"
@@ -53,8 +52,6 @@ private:
 
     QNetworkAccessManager *_network_manager;
     QNetworkRequest _network_request;
-
-    QHttpMultiPart *_multi_part;
 };
 
 extern const char *yukang_branch[20][2];
