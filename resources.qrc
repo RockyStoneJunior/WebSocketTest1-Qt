@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>yukang.jpg</file>
+        <file>yukang_logo.ico</file>
+    </qresource>
+    <qresource prefix="/sound">
+        <file>New order.wav</file>
+    </qresource>
+</RCC>

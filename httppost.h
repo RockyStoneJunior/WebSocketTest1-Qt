@@ -6,10 +6,13 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 
-enum PostType{
-    LOGIN,
-    REGISTER,
-    RECONNECT
+#pragma execution_character_set("utf-8")
+
+enum HttpPostResult{
+    CONNECTION_REFUSED,
+    SUCCESS,
+    ISLOGIN,
+    FAILED
 };
 
 class HttpPost : public QObject
@@ -17,21 +20,21 @@ class HttpPost : public QObject
     Q_OBJECT
 public:
     explicit HttpPost(QObject *parent = nullptr);
+    ~HttpPost();
 
     void send_login_post();
     void send_register_post();
 
-    void set_post_type(PostType post_type){ _post_type = post_type;}
-
 signals:
+    void login_result(HttpPostResult result);
+    void register_result(QString reponse);
+    void reconnect_result(HttpPostResult result);
 
 public slots:
 
 private:
     QNetworkAccessManager *_network_manager;
     QNetworkRequest _network_request;
-
-    PostType _post_type;
 };
 
 #endif // HTTPPOST_H

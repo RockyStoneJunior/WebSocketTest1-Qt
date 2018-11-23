@@ -3,14 +3,14 @@
 #pragma execution_character_set("utf-8")
 
 const char *yukang_branch[20][2] = {
-    {"荟芳园店","huifang"},
+    {"荟芳园分店","huifang"},
     {"康乐分店" ,"kangle"},
     {"南山分店" ,"nanshan"},
     {"桃源分店" ,"taoyuan"},
     {"荔苑分店" ,"liyuan"},
     {"龙海分店" ,"longhai"},
     {"海印分店" ,"haiyin"},
-    {"阳光里店" ,"yangguangli"},
+    {"阳光里分店" ,"yangguangli"},
     {"常兴分店" ,"changxing"},
     {"银兴分店" ,"yinxing"},
     {"南海城分店" ,"nanhai"},

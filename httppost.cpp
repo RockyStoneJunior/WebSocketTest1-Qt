@@ -16,51 +16,61 @@ HttpPost::HttpPost(QObject *parent) : QObject(parent)
     connect(_network_manager, &QNetworkAccessManager::finished,
             this, [=](QNetworkReply *reply){
 
-        //_information_label->setStyleSheet("QLabel {color:red}");
-
         if(reply->error()){
             qDebug(reply->errorString().toLatin1());
-            //_information_label->setText("网络连接异常，请稍后再试");
+            emit login_result(CONNECTION_REFUSED);
             return;
         }
 
         QString reponse = reply->readAll();
         qDebug(reponse.toUtf8());
 
-        QJsonDocument doc = QJsonDocument::fromJson(reponse.toUtf8());
-        QJsonObject obj = doc.object();
+        UserStat state = UserAccount::get_instance().get_user_state();
 
-        qDebug("result from json:" + obj["result"].toString().toUtf8());
-        qDebug("branch from json:" + obj["branch"].toString().toUtf8());
-        qDebug("token from json:" + obj["token"].toString().toUtf8());
-
-
-        QList<QByteArray> headerList = reply->rawHeaderList();
-        foreach(QByteArray head, headerList) {
-            qDebug() << head << ":" << reply->rawHeader(head);
-        }
-
-        _post_type = LOGIN;
-
-        switch (_post_type) {
+        switch (state) {
             case LOGIN:
                 {
+                    QJsonDocument doc = QJsonDocument::fromJson(reponse.toUtf8());
+                    QJsonObject obj = doc.object();
+
                     if(!obj["result"].toString().compare("success"))
                     {
                         UserAccount::get_instance().set_branch_name(obj["branch"].toString().toUtf8());
+                        UserAccount::get_instance().set_branch_name_en(obj["branch_name_en"].toString().toUtf8());
+                        UserAccount::get_instance().set_branch_id(obj["branch_id"].toString().toUtf8());
                         UserAccount::get_instance().set_session_id(obj["token"].toString());
                         qDebug("Login Success!!!");
-                        //emit accept();
+                        emit login_result(SUCCESS);
+                    }else if(!obj["result"].toString().compare("islogin")){
+                        emit login_result(ISLOGIN);
                     }else{
-                        //_information_label->setText("登录失败，用户名或密码错误");
+                        emit login_result(FAILED);
                     }
                 }
                 break;
             case REGISTER:
-                //_information_label->setText(reponse);
+                emit register_result(reponse);
                 break;
             case RECONNECT:
+                qDebug("Reconnect success");
+                {
+                    QJsonDocument doc = QJsonDocument::fromJson(reponse.toUtf8());
+                    QJsonObject obj = doc.object();
 
+                    if(!obj["result"].toString().compare("success"))
+                    {
+                        UserAccount::get_instance().set_branch_name(obj["branch"].toString().toUtf8());
+                        UserAccount::get_instance().set_branch_name_en(obj["branch_name_en"].toString().toUtf8());
+                        UserAccount::get_instance().set_branch_id(obj["branch_id"].toString().toUtf8());
+                        UserAccount::get_instance().set_session_id(obj["token"].toString());
+                        qDebug("Login Success!!!");
+                        emit reconnect_result(SUCCESS);
+                    }else if(!obj["result"].toString().compare("islogin")){
+                        emit login_result(ISLOGIN);
+                    }else{
+                        emit reconnect_result(FAILED);
+                    }
+                }
                 break;
             default:
                 break;
@@ -70,7 +80,7 @@ HttpPost::HttpPost(QObject *parent) : QObject(parent)
 
 void HttpPost::send_login_post()
 {
-    _network_request.setUrl(QUrl("http://localhost:19966/user/login"));
+    _network_request.setUrl(QUrl("http://120.24.61.253:9999/user/login"));
     _network_request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery qu;
@@ -85,7 +95,7 @@ void HttpPost::send_login_post()
 
 void HttpPost::send_register_post()
 {
-    _network_request.setUrl(QUrl("http://localhost:19966/user/register"));
+    _network_request.setUrl(QUrl("http://120.24.61.253:9999/user/register"));
     _network_request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery qu;
@@ -98,4 +108,9 @@ void HttpPost::send_register_post()
     QUrl params;
     params.setQuery(qu);
     _network_manager->post(_network_request, params.toEncoded());
+}
+
+HttpPost::~HttpPost()
+{
+    qDebug("Http post deconstructed!");
 }

@@ -9,6 +9,7 @@
 #include <QTimer>
 
 #include "mainwindow.h"
+#include "httppost.h"
 
 class MainWindow;
 
@@ -27,6 +28,7 @@ public:
     }
 
     void connect_server();
+    void send_heart();
 
 protected:
     explicit WebSocketClient(QObject *parent = nullptr);
@@ -40,20 +42,21 @@ protected:
 
 signals:
     void set_mainwindow_title(QString title);
+    void connect_server_result(bool success);
 
 private Q_SLOTS:
     void onConnected();
     void onTextMessageReceived(QString message);
     void onClosed();
+    void on_reconnect_result(HttpPostResult result);
 
 private:
     QWebSocket _web_socket;
+    HttpPost _http_post;
     QTimer *_timer;
 
     static WebSocketClient* _instance;
     static WebSocketClient* create_instance(){return new WebSocketClient;}
-
-    bool _is_login;
 };
 
 #endif // WEBSOCKETCLIENT_H

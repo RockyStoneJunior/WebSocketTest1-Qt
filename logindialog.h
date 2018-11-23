@@ -30,6 +30,9 @@ public:
 private slots:
     void loginButtonClicked();
     void registerLabelClicked();
+    void on_login_result(HttpPostResult result);
+    void on_register_result(QString reponse);
+    void on_connect_server(bool success);
 
 private:
     QLabel *_information_label;

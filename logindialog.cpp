@@ -93,6 +93,12 @@ LoginDialog::LoginDialog()
     _is_login = true;
 
     _http_post = new HttpPost;
+
+    connect(_http_post, SIGNAL(login_result(HttpPostResult)), this, SLOT(on_login_result(HttpPostResult)));
+    connect(&WebSocketClient::get_instance(), SIGNAL(connect_server_result(bool)),
+            this, SLOT(on_connect_server(bool)));
+
+    connect(_http_post, SIGNAL(register_result(QString)), this, SLOT(on_register_result(QString)));
 }
 
 void LoginDialog::loginButtonClicked()
@@ -117,23 +123,29 @@ void LoginDialog::loginButtonClicked()
         return;
     }
 
+    UserAccount::get_instance().set_username(_username_edit->text());
+    UserAccount::get_instance().set_password(_password_edit->text());
+    UserAccount::get_instance().set_branch_name(_branch_list->currentText());
+
     if(_is_login)
     {
         qDebug("is login");
 
-        UserAccount::get_instance().set_username(_username_edit->text());
-        UserAccount::get_instance().set_password(_password_edit->text());
-
-         _information_label->setText("");
+        UserAccount::get_instance().set_user_state(LOGIN);
+        _information_label->setText("");
 
         _http_post->send_login_post();
+        _information_label->setStyleSheet("QLabel {color:green}");
          _information_label->setText("登陆进行中...");
     }else{
         qDebug("is register");
         qDebug(_branch_list->currentText().toUtf8());
 
+        UserAccount::get_instance().set_user_state(REGISTER);
+
         if(QString::compare(_password_edit->text(), _confirm_passwd_edit->text()))
         {
+            _information_label->setStyleSheet("QLabel {color:red}");
             _information_label->setText(tr("两次输入的密码不一致，请重新输入密码"));
         }else{
              _information_label->setText("");
@@ -176,4 +188,44 @@ void LoginDialog::registerLabelClicked()
         _branch_label->hide();
         _branch_list->hide();
     }
+}
+
+void LoginDialog::on_login_result(HttpPostResult result)
+{
+    _information_label->setStyleSheet("QLabel {color:red}");
+
+    switch (result) {
+    case SUCCESS:
+        WebSocketClient::get_instance().connect_server();
+        break;
+
+    case FAILED:
+        _information_label->setText("登录失败，用户名或密码错误");
+        break;
+
+    case ISLOGIN:
+        _information_label->setText("登录失败，该用户已在线");
+        break;
+
+    case CONNECTION_REFUSED:
+        _information_label->setText("网络连接异常，请重试");
+    default:
+        break;
+    }
+}
+
+void LoginDialog::on_connect_server(bool success)
+{
+    _information_label->setStyleSheet("QLabel {color:red}");
+
+    if(success){
+        emit accept();
+    }else{
+        _information_label->setText("连接服务器失败");
+    }
+}
+
+void LoginDialog::on_register_result(QString reponse)
+{
+    _information_label->setText(reponse.toUtf8());
 }
