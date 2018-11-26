@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _timer->start(1000*30);
 }
 
+
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QPixmap bkgnd(":/images/yukang.jpg");
